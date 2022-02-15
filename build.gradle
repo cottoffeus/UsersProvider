@@ -35,7 +35,11 @@ dependencies {
     implementation "org.http4k:http4k-core:${http4kVersion}"
     implementation "org.http4k:http4k-format-jackson:${http4kVersion}"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    implementation "com.beust:klaxon:${klaxonVersion}"
+    implementation "com.github.jasync-sql:jasync-postgresql:${pgClientVersion}"
     testImplementation "org.http4k:http4k-testing-kotest:${http4kVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    testImplementation "com.beust:klaxon:${klaxonVersion}"
+    testImplementation "com.github.jasync-sql:jasync-postgresql:${pgClientVersion}"
 }
