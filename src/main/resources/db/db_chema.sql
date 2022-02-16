@@ -10,5 +10,10 @@ CREATE SCHEMA users_provider AUTHORIZATION app;
 
 CREATE TABLE users_provider.users (
 	username varchar NULL,
-	id int8 NOT NULL GENERATED ALWAYS AS IDENTITY
+	id int8 NOT NULL GENERATED ALWAYS AS IDENTITY,
+	first_name varchar NULL,
+	last_name varchar NULL,
+	email varchar NULL,
+	phone varchar NULL,
+	CONSTRAINT users_username_un UNIQUE (username)
 );
