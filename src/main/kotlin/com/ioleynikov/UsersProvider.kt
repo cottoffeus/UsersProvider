@@ -36,7 +36,13 @@ val app: HttpHandler = routes(
     "/user/{username}" bind Method.PUT to { request ->
         usersRepository.updateUser(request.path("username")!!.toString(), Klaxon().parse<User>(request.bodyString()))
         Response(OK)
+    },
+
+    "/user/{username}" bind Method.DELETE to { request ->
+        usersRepository.deleteUser((request.path("username")!!.toString()))
+        Response(OK)
     }
+
 
 //    "/contract/api/v1" bind contract {
 //        renderer = OpenApi3(ApiInfo("UsersProvider API", "v1.0"), Jackson)
