@@ -1,10 +1,15 @@
 package com.ioleynikov
 
 import com.beust.klaxon.Klaxon
+import com.ioleynikov.testModel.ResultResponse
 import com.ioleynikov.testModel.User
+import com.ioleynikov.testModel.enums.ResultResponseCodes
+import com.ioleynikov.testModel.enums.ResultResponseMessages
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
+import org.http4k.core.Status.Companion.BAD_REQUEST
+import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.OK
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -37,6 +42,10 @@ class UsersProviderTest {
         return app(Request(Method.PUT, "/user/${username}").body(Klaxon().toJsonString(user)))
     }
 
+    private fun deleteUserRequest(username: String): Response {
+        return app(Request(Method.DELETE, "/user/${username}"))
+    }
+
     @Test
     fun `Ping test`() {
         assertEquals(app(Request(Method.GET, "/ping")), Response(OK).body("pong"))
@@ -45,26 +54,39 @@ class UsersProviderTest {
     @Test
     fun `Create User Test`() {
         val testUser = createUser()
-        val createUserResponseResult = createUserRequest(testUser!!)
-        val getUserResponseResult = getUserRequest(testUser!!.username!!)
+        val createUserResponseResult = createUserRequest(testUser)
+        val getUserResponseResult = getUserRequest(testUser.username!!)
         val userFromResponse = Klaxon().parse<User>(getUserResponseResult.body.toString())
+
+        deleteUserRequest(testUser.username!!)
 
         assertEquals(createUserResponseResult, Response(OK))
         assertEquals(userFromResponse, testUser)
     }
 
-//    @Test
-//    fun `Create User Test Idempotence `() {
-//        val testUser = createUser()
-//        val createUserResponseResult = createUserRequest(testUser)
-//        val createUserResponseSecondResult = createUserRequest(testUser)
-//        val getUserResponseResult = getUserRequest(testUser.username!!)
-//        val userFromResponse = Klaxon().parse<User>(getUserResponseResult.body.toString())
-//
-//        assertEquals(createUserResponseResult, Response(OK))
-//        assertEquals(createUserResponseSecondResult, Response(OK))
-//        assertEquals(userFromResponse, testUser)
-//    }
+    @Test
+    fun `Create Same User Test`() {
+        val testUser = createUser()
+        val createUserResponseResult = createUserRequest(testUser)
+        val createUserResponseSecondResult = createUserRequest(testUser)
+        val getUserResponseResult = getUserRequest(testUser.username!!)
+        val userFromResponse = Klaxon().parse<User>(getUserResponseResult.body.toString())
+
+        deleteUserRequest(testUser.username!!)
+
+        assertEquals(createUserResponseResult, Response(OK))
+        assertEquals(
+            createUserResponseSecondResult, Response(BAD_REQUEST).body(
+                Klaxon().toJsonString(
+                    ResultResponse(
+                        code = ResultResponseCodes.ERROR.code,
+                        message = ResultResponseMessages.USER_ALREADY_EXISTS.message
+                    )
+                )
+            )
+        )
+        assertEquals(userFromResponse, testUser)
+    }
 
 
     @Test
@@ -78,13 +100,29 @@ class UsersProviderTest {
         val userUpdateResponseResult = updateUserRequest(testUser.username!!, newUser)
         val userFromResponse = getUserRequest(testUser.username!!)
 
+        deleteUserRequest(testUser.username!!)
+
         assertEquals(createUserResponseResult, Response(OK))
         assertEquals(userUpdateResponseResult, Response(OK))
-        assertEquals(Klaxon().parse<User>(userFromResponse.body.toString()) , newUser)
+        assertEquals(Klaxon().parse<User>(userFromResponse.body.toString()), newUser)
     }
 
     @Test
     fun `Success Delete User Test`() {
+        val testUser = createUser()
+        createUserRequest(testUser)
+
+        val userDeleteRequestResult = deleteUserRequest(testUser.username!!)
+        assertEquals(
+            userDeleteRequestResult, Response(NO_CONTENT).body(
+                Klaxon().toJsonString(
+                    ResultResponse(
+                        code = ResultResponseCodes.SUCCESS.code,
+                        message = ResultResponseMessages.USER_DELETED.message
+                    )
+                )
+            )
+        )
 
     }
 }

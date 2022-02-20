@@ -1,6 +1,6 @@
 package com.ioleynikov.model
 
-data class Response(
+data class ResultResponse(
     val code: Number,
     val message: String
 )

@@ -1,14 +1,16 @@
 package com.ioleynikov
 
 import com.beust.klaxon.Klaxon
+import com.ioleynikov.model.ResultResponse
 import com.ioleynikov.model.User
+import com.ioleynikov.model.enums.ResultResponseCodes
+import com.ioleynikov.model.enums.ResultResponseMessages
 import com.ioleynikov.repositories.UsersRepository
 import mu.KotlinLogging
-import org.http4k.core.HttpHandler
-import org.http4k.core.Method
-import org.http4k.core.Response
+import org.http4k.core.*
+import org.http4k.core.Status.Companion.NOT_FOUND
+import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.OK
-import org.http4k.core.then
 import org.http4k.filter.DebuggingFilters.PrintRequest
 import org.http4k.routing.bind
 import org.http4k.routing.path
@@ -26,8 +28,19 @@ val app: HttpHandler = routes(
     },
 
     "/user" bind Method.POST to { request ->
-        usersRepository.createUser(Klaxon().parse<User>(request.bodyString()))
-        Response(OK)
+        val isUserCreated = usersRepository.createUser(Klaxon().parse<User>(request.bodyString()))
+        if (isUserCreated) {
+            Response(OK)
+        } else {
+            Response(Status.BAD_REQUEST).body(
+                Klaxon().toJsonString(
+                    ResultResponse(
+                        code = ResultResponseCodes.ERROR.code,
+                        message = ResultResponseMessages.USER_ALREADY_EXISTS.message
+                    )
+                )
+            )
+        }
     },
 
     "/user/{username}" bind Method.PUT to { request ->
@@ -37,12 +50,32 @@ val app: HttpHandler = routes(
 
     "/user/{username}" bind Method.DELETE to { request ->
         usersRepository.deleteUser((request.path("username")!!.toString()))
-        Response(OK)
+        //TODO("Сделать ответ зависимым от результата")
+        Response(NO_CONTENT).body(
+            Klaxon().toJsonString(
+                ResultResponse(
+                    code = ResultResponseCodes.SUCCESS.code,
+                    message = ResultResponseMessages.USER_DELETED.message
+                )
+            )
+        )
     },
     "/user/{username}" bind Method.GET to { request ->
         val user = usersRepository.getUser(request.path("username")!!.toString())
-        val body = Klaxon().toJsonString(user)
-        Response(OK).body(body)
+        if (user == null) {
+            Response(NOT_FOUND).body(
+                Klaxon().toJsonString(
+                    ResultResponse(
+                        code = ResultResponseCodes.SUCCESS.code,
+                        message = ResultResponseMessages.USER_NOT_FOUND.message
+                    )
+                )
+            )
+        } else {
+            val body = Klaxon().toJsonString(user)
+            Response(OK).body(body)
+        }
+
     }
 
 )
