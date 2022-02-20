@@ -1,89 +1,90 @@
 package com.ioleynikov
 
-import org.http4k.core.Method.GET
-import org.http4k.core.Method.POST
+import com.beust.klaxon.Klaxon
+import com.ioleynikov.testModel.User
+import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
-import org.http4k.kotest.shouldHaveBody
-import org.http4k.kotest.shouldHaveStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import kotlin.random.Random
 
 class UsersProviderTest {
-
-    fun createUser(): Response {
-        return app(Request(POST, "/user").body("{\n" +
-                "  \"username\": \"johndoe589\",\n" +
-                "  \"firstName\": \"John\",\n" +
-                "  \"lastName\": \"Doe\",\n" +
-                "  \"email\": \"bestjohn@doe.com\",\n" +
-                "  \"phone\": \"+71002003040\"\n" +
-                "}"))
+    private val random = Random(LocalDateTime.now().second)
+    private fun createUser(): User {
+        return Klaxon().parse<User>(
+            "{\n" +
+                    "  \"username\": \"johndoe${random.nextInt()}\",\n" +
+                    "  \"firstName\": \"John\",\n" +
+                    "  \"lastName\": \"Doe\",\n" +
+                    "  \"email\": \"bestjohn@doe.com\",\n" +
+                    "  \"phone\": \"+71002003040\"\n" +
+                    "}"
+        )!!
     }
+
+    private fun createUserRequest(user: User): Response {
+        return app(Request(Method.POST, "/user").body(Klaxon().toJsonString(user)))
+    }
+
+    private fun getUserRequest(username: String): Response {
+        return app(Request(Method.GET, "/user/${username}"))
+    }
+
+    private fun updateUserRequest(username: String, user: User): Response {
+        return app(Request(Method.PUT, "/user/${username}").body(Klaxon().toJsonString(user)))
+    }
+
     @Test
     fun `Ping test`() {
-        assertEquals(app(Request(GET, "/ping")), Response(OK).body("pong"))
+        assertEquals(app(Request(Method.GET, "/ping")), Response(OK).body("pong"))
     }
 
     @Test
     fun `Create User Test`() {
-        val userCreateResponse = createUser()
-//        val result = Klaxon().parse<User>("{\n" +
-//                "  \"username\": \"johndoe589\",\n" +
-//                "  \"firstName\": \"John\",\n" +
-//                "  \"lastName\": \"Doe\",\n" +
-//                "  \"email\": \"bestjohn@doe.com\",\n" +
-//                "  \"phone\": \"+71002003040\"\n" +
-//                "}")
-        assertEquals(userCreateResponse.status, Response(OK))
+        val testUser = createUser()
+        val createUserResponseResult = createUserRequest(testUser!!)
+        val getUserResponseResult = getUserRequest(testUser!!.username!!)
+        val userFromResponse = Klaxon().parse<User>(getUserResponseResult.body.toString())
+
+        assertEquals(createUserResponseResult, Response(OK))
+        assertEquals(userFromResponse, testUser)
     }
+
+//    @Test
+//    fun `Create User Test Idempotence `() {
+//        val testUser = createUser()
+//        val createUserResponseResult = createUserRequest(testUser)
+//        val createUserResponseSecondResult = createUserRequest(testUser)
+//        val getUserResponseResult = getUserRequest(testUser.username!!)
+//        val userFromResponse = Klaxon().parse<User>(getUserResponseResult.body.toString())
+//
+//        assertEquals(createUserResponseResult, Response(OK))
+//        assertEquals(createUserResponseSecondResult, Response(OK))
+//        assertEquals(userFromResponse, testUser)
+//    }
+
 
     @Test
     fun `Success Update User Test`() {
-        val userCreateResponse =
+        val testUser = createUser()
+        val createUserResponseResult = createUserRequest(testUser)
+        val newUser = User(testUser)
+        newUser.firstName = "newFirstName"
+        newUser.lastName = "newLastName"
 
-        Response(OK).body("{\"userId\": \"\"}")
-//        assertEquals(userCreateResponse, )
+        val userUpdateResponseResult = updateUserRequest(testUser.username!!, newUser)
+        val userFromResponse = getUserRequest(testUser.username!!)
+
+        assertEquals(createUserResponseResult, Response(OK))
+        assertEquals(userUpdateResponseResult, Response(OK))
+        assertEquals(Klaxon().parse<User>(userFromResponse.body.toString()) , newUser)
     }
+
     @Test
-
-    fun `Success Get User Test`() {
-        val userCreateResponse = app(Request(POST, "/user").body("{\n" +
-                "  \"username\": \"johndoe589\",\n" +
-                "  \"firstName\": \"John\",\n" +
-                "  \"lastName\": \"Doe\",\n" +
-                "  \"email\": \"bestjohn@doe.com\",\n" +
-                "  \"phone\": \"+71002003040\"\n" +
-                "}"))
-
-        Response(OK).body("{\"userId\": \"\"}")
-//        assertEquals(userCreateResponse, )
-    }
-
     fun `Success Delete User Test`() {
-        val userCreateResponse = app(Request(POST, "/user").body("{\n" +
-                "  \"username\": \"johndoe589\",\n" +
-                "  \"firstName\": \"John\",\n" +
-                "  \"lastName\": \"Doe\",\n" +
-                "  \"email\": \"bestjohn@doe.com\",\n" +
-                "  \"phone\": \"+71002003040\"\n" +
-                "}"))
 
-        Response(OK).body("{\"userId\": \"\"}")
-//        assertEquals(userCreateResponse, )
     }
-
-
-    @Test
-    fun `Check Kotest matcher for http4k work as expected`() {
-        val request = Request(GET, "/testing/kotest?a=b").body("http4k is cool").header("my header", "a value")
-    
-        val response = app(request)
-    
-        // response assertions
-        response shouldHaveStatus OK
-        response shouldHaveBody "Echo 'http4k is cool'"
-    }
-
 }
