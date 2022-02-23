@@ -43,3 +43,13 @@ dependencies {
     testImplementation "com.beust:klaxon:${klaxonVersion}"
     testImplementation "com.github.jasync-sql:jasync-postgresql:${pgClientVersion}"
 }
+
+task fatJar(type: Jar) {
+    duplicatesStrategy = 'include'
+    manifest {
+        attributes 'Main-Class': "${mainClassName}"
+    }
+    archiveBaseName = "${rootProject.name}"
+    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
