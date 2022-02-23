@@ -1,6 +1,7 @@
 package com.ioleynikov
 
 import com.beust.klaxon.Klaxon
+import com.ioleynikov.handlers.routingHttpHandler
 import com.ioleynikov.testModel.ResultResponse
 import com.ioleynikov.testModel.User
 import com.ioleynikov.testModel.enums.ResultResponseCodes
@@ -30,24 +31,24 @@ class UsersProviderTest {
     }
 
     private fun createUserRequest(user: User): Response {
-        return app(Request(Method.POST, "/user").body(Klaxon().toJsonString(user)))
+        return routingHttpHandler(Request(Method.POST, "/user").body(Klaxon().toJsonString(user)))
     }
 
     private fun getUserRequest(username: String): Response {
-        return app(Request(Method.GET, "/user/${username}"))
+        return routingHttpHandler(Request(Method.GET, "/user/${username}"))
     }
 
     private fun updateUserRequest(username: String, user: User): Response {
-        return app(Request(Method.PUT, "/user/${username}").body(Klaxon().toJsonString(user)))
+        return routingHttpHandler(Request(Method.PUT, "/user/${username}").body(Klaxon().toJsonString(user)))
     }
 
     private fun deleteUserRequest(username: String): Response {
-        return app(Request(Method.DELETE, "/user/${username}"))
+        return routingHttpHandler(Request(Method.DELETE, "/user/${username}"))
     }
 
     @Test
     fun `Ping test`() {
-        assertEquals(app(Request(Method.GET, "/ping")), Response(OK).body("pong"))
+        assertEquals(routingHttpHandler(Request(Method.GET, "/ping")), Response(OK).body("pong"))
     }
 
     @Test
