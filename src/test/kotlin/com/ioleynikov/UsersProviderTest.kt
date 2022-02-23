@@ -9,7 +9,6 @@ import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.BAD_REQUEST
-import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.OK
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -103,7 +102,16 @@ class UsersProviderTest {
         deleteUserRequest(testUser.username!!)
 
         assertEquals(createUserResponseResult, Response(OK))
-        assertEquals(userUpdateResponseResult, Response(OK))
+        assertEquals(
+            userUpdateResponseResult, Response(OK).body(
+                Klaxon().toJsonString(
+                    ResultResponse(
+                        code = ResultResponseCodes.SUCCESS.code,
+                        message = ResultResponseMessages.USER_UPDATED.message
+                    )
+                )
+            )
+        )
         assertEquals(Klaxon().parse<User>(userFromResponse.body.toString()), newUser)
     }
 
@@ -114,7 +122,7 @@ class UsersProviderTest {
 
         val userDeleteRequestResult = deleteUserRequest(testUser.username!!)
         assertEquals(
-            userDeleteRequestResult, Response(NO_CONTENT).body(
+            userDeleteRequestResult, Response(OK).body(
                 Klaxon().toJsonString(
                     ResultResponse(
                         code = ResultResponseCodes.SUCCESS.code,
