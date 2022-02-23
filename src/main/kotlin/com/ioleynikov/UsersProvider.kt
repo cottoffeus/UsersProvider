@@ -48,21 +48,45 @@ val app: HttpHandler = routes(
     },
 
     "/user/{username}" bind Method.PUT to { request ->
-        usersRepository.updateUser(request.path("username")!!.toString(), Klaxon().parse<User>(request.bodyString()))
-        Response(OK)
+        val isUserUpdated = usersRepository.updateUser(
+            request.path("username")!!.toString(),
+            Klaxon().parse<User>(request.bodyString())
+        )
+        if (isUserUpdated) {
+            Response(OK).body(
+                Klaxon().toJsonString(
+                    ResultResponse(
+                        code = ResultResponseCodes.SUCCESS.code,
+                        message = ResultResponseMessages.USER_UPDATED.message
+                    )
+                )
+            )
+        } else {
+            Response(NOT_FOUND).body(
+                Klaxon().toJsonString(
+                    ResultResponse(
+                        code = ResultResponseCodes.ERROR.code,
+                        message = ResultResponseMessages.USER_NOT_FOUND.message
+                    )
+                )
+            )
+        }
     },
 
     "/user/{username}" bind Method.DELETE to { request ->
-        usersRepository.deleteUser((request.path("username")!!.toString()))
-        //TODO("Сделать ответ зависимым от результата")
-        Response(NO_CONTENT).body(
-            Klaxon().toJsonString(
-                ResultResponse(
-                    code = ResultResponseCodes.SUCCESS.code,
-                    message = ResultResponseMessages.USER_DELETED.message
+        val isUserDeleted = usersRepository.deleteUser((request.path("username")!!.toString()))
+        if (isUserDeleted) {
+            Response(OK).body(
+                Klaxon().toJsonString(
+                    ResultResponse(
+                        code = ResultResponseCodes.SUCCESS.code,
+                        message = ResultResponseMessages.USER_DELETED.message
+                    )
                 )
             )
-        )
+        } else {
+            Response(NO_CONTENT)
+        }
     },
     "/user/{username}" bind Method.GET to { request ->
         val user = usersRepository.getUser(request.path("username")!!.toString())
@@ -76,10 +100,8 @@ val app: HttpHandler = routes(
                 )
             )
         } else {
-            val body = Klaxon().toJsonString(user)
-            Response(OK).body(body)
+            Response(OK).body(Klaxon().toJsonString(user))
         }
-
     }
 
 )

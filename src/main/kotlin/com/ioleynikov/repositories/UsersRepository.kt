@@ -37,17 +37,17 @@ class UsersRepository(config: UsersProviderConfig) {
                         "'${user?.phone}') " +
                     "ON CONFLICT DO NOTHING"
         )
-        val queryResult = future.get()
-        return queryResult.rowsAffected.compareTo(0) != 0
+        return future.get().rowsAffected.compareTo(0) != 0
     }
 
-    fun updateUser(username: String, user: User?) {
-        val future =
-            connection.sendPreparedStatement("UPDATE ${appSchema}.users SET first_name='${user?.firstName}', last_name='${user?.lastName}', email='${user?.email}', phone='${user?.phone}' where username='${username}'")
+    fun updateUser(username: String, user: User?): Boolean {
+        val future = connection.sendPreparedStatement("UPDATE ${appSchema}.users SET first_name='${user?.firstName}', last_name='${user?.lastName}', email='${user?.email}', phone='${user?.phone}' where username='${username}'")
+        return future.get().rowsAffected.compareTo(0) != 0
     }
 
-    fun deleteUser(username: String) {
+    fun deleteUser(username: String): Boolean {
         val future = connection.sendPreparedStatement("DELETE FROM ${appSchema}.users WHERE username='${username}'")
+        return future.get().rowsAffected.compareTo(0) != 0
     }
 
     fun getUser(username: String): User? {
