@@ -13,6 +13,11 @@ services:
       - 'POSTGRESQL_USERNAME=app'
       - 'POSTGRESQL_PASSWORD=pass'
       - 'POSTGRESQL_DATABASE=db'
+  users_provider:
+    image: cottoffeus/users_provider:0.0.1
+    container_name: users_provider
+    ports:
+      - '9000:9000'
 volumes:
   postgresql_data:
     driver: local

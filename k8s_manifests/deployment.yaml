@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-provider
+  namespace: testing
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 777
+      targetPort: 9000
+  selector:
+    app: users-provider-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-provider
+  namespace: testing
+  labels:
+    app: users-provider-app
+spec:
+  selector:
+    matchLabels:
+      app: users-provider-app
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: users-provider-app
+    spec:
+      containers:
+        - image: cottoffeus/users_provider:0.0.1
+          name: users-provider
+          ports:
+            - containerPort: 9000
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 5

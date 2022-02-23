@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: users-provider-ingress
+  namespace: testing
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: arch.homework
+      http:
+        paths:
+          - backend:
+              service:
+                name: users-provider
+                port:
+                  number: 777
+            pathType: Prefix
+            path: /
