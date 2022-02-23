@@ -37,11 +37,16 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     implementation "com.beust:klaxon:${klaxonVersion}"
     implementation "com.github.jasync-sql:jasync-postgresql:${pgClientVersion}"
+    implementation "com.sksamuel.hoplite:hoplite-core:${sksamuelHopliteVersion}"
+    implementation "com.sksamuel.hoplite:hoplite-yaml:${sksamuelHopliteYamlVersion}"
+
     testImplementation "org.http4k:http4k-testing-kotest:${http4kVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     testImplementation "com.beust:klaxon:${klaxonVersion}"
     testImplementation "com.github.jasync-sql:jasync-postgresql:${pgClientVersion}"
+    testImplementation "com.sksamuel.hoplite:hoplite-core:${sksamuelHopliteVersion}"
+    testImplementation "com.sksamuel.hoplite:hoplite-yaml:${sksamuelHopliteYamlVersion}"
 }
 
 task fatJar(type: Jar) {

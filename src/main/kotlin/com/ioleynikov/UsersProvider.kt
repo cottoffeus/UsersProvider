@@ -1,11 +1,13 @@
 package com.ioleynikov
 
 import com.beust.klaxon.Klaxon
+import com.ioleynikov.config.UsersProviderConfig
 import com.ioleynikov.model.ResultResponse
 import com.ioleynikov.model.User
 import com.ioleynikov.model.enums.ResultResponseCodes
 import com.ioleynikov.model.enums.ResultResponseMessages
 import com.ioleynikov.repositories.UsersRepository
+import com.sksamuel.hoplite.ConfigLoader
 import mu.KotlinLogging
 import org.http4k.core.*
 import org.http4k.core.Status.Companion.NOT_FOUND
@@ -18,7 +20,9 @@ import org.http4k.routing.routes
 import org.http4k.server.SunHttp
 import org.http4k.server.asServer
 
-val usersRepository: UsersRepository = UsersRepository()
+val usersProviderConfig = ConfigLoader().loadConfigOrThrow<UsersProviderConfig>("/users_db-dev.yaml")
+val usersRepository: UsersRepository = UsersRepository(config = usersProviderConfig)
+
 private val logger = KotlinLogging.logger {}
 
 val app: HttpHandler = routes(
@@ -81,11 +85,6 @@ val app: HttpHandler = routes(
 )
 
 fun main() {
-    logger.error("starting")
-    logger.warn("starting warn")
-    logger.info("starting info")
-    logger.debug("starting debug")
-    logger.trace("starting trace")
     val printingApp: HttpHandler = PrintRequest().then(app)
 
     val server = printingApp.asServer(SunHttp(9000)).start()

@@ -1,0 +1,8 @@
+---
+database:
+  username : "app"
+  password : "pass"
+  host : "postgres"
+  port : 5432
+  database: "db"
+  appSchema: "users_provider"

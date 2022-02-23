@@ -7,18 +7,19 @@ import com.github.jasync.sql.db.QueryResult
 import com.github.jasync.sql.db.general.ArrayRowData
 import com.github.jasync.sql.db.pool.ConnectionPool
 import com.github.jasync.sql.db.postgresql.pool.PostgreSQLConnectionFactory
+import com.ioleynikov.config.UsersProviderConfig
 import com.ioleynikov.model.User
 
-class UsersRepository {
-    private val appSchema: String = "users_provider"
+class UsersRepository(config: UsersProviderConfig) {
+    private val appSchema: String = config.database.appSchema
     private val connection: Connection = ConnectionPool(
         PostgreSQLConnectionFactory(
             Configuration(
-                username = "app",
-                password = "pass",
-                host = "localhost",
-                port = 5432,
-                database = "db"
+                username = config.database.username,
+                password = config.database.password,
+                host = config.database.host,
+                port = config.database.port,
+                database = config.database.database
             )
         ), ConnectionPoolConfiguration()
     )
