@@ -6,3 +6,5 @@ database:
   port : 5432
   database: "db"
   appSchema: "users_provider"
+server:
+  port: 9000
