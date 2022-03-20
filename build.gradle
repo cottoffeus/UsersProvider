@@ -30,15 +30,6 @@ test {
     useJUnitPlatform()
 }
 
-task fatJar(type: Jar) {
-    duplicatesStrategy = 'include'
-    manifest {
-        attributes 'Main-Class': "${mainClassName}"
-    }
-    archiveBaseName = "${rootProject.name}"
-    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
 
 dependencies {
     implementation "org.http4k:http4k-contract:${http4kVersion}"
@@ -57,4 +48,17 @@ dependencies {
     testImplementation "com.github.jasync-sql:jasync-postgresql:${pgClientVersion}"
     testImplementation "com.sksamuel.hoplite:hoplite-core:${sksamuelHopliteVersion}"
     testImplementation "com.sksamuel.hoplite:hoplite-yaml:${sksamuelHopliteYamlVersion}"
+}
+
+task fatJar(type: Jar) {
+    duplicatesStrategy = 'include'
+    manifest {
+        attributes 'Main-Class': "${mainClassName}"
+    }
+    archiveBaseName = "${rootProject.name}"
+    from {
+        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
 }

@@ -16,9 +16,9 @@ import org.http4k.routing.bind
 import org.http4k.routing.path
 import org.http4k.routing.routes
 
-val usersProviderConfig = ConfigLoader().loadConfigOrThrow<UsersProviderConfig>("/users_provider-dev.yaml")
+val usersProviderConfig = ConfigLoader().loadConfigOrThrow<UsersProviderConfig>("/users_provider.properties")
 val usersRepository: UsersRepository = UsersRepository(config = usersProviderConfig)
-val klaxon : Klaxon = Klaxon()
+val klaxon: Klaxon = Klaxon()
 val routingHttpHandler: HttpHandler = routes(
 
     "/ping" bind Method.GET to {

@@ -34,7 +34,7 @@ spec:
         app: users-provider-app
     spec:
       containers:
-        - image: cottoffeus/users_provider:0.0.1
+        - image: cottoffeus/users_provider:0.0.6
           name: users-provider
           ports:
             - containerPort: 9000
