@@ -52,6 +52,9 @@ dependencies {
 
 task fatJar(type: Jar) {
     duplicatesStrategy = 'include'
+    processResources {
+        exclude('*')
+    }
     manifest {
         attributes 'Main-Class': "${mainClassName}"
     }
